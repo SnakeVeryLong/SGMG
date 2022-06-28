@@ -21,7 +21,7 @@ export class AuthService {
   async login(user: any): Promise<Record<string, any>> {
     // Флаг проверки
     let isOk = false;
-
+    console.log(user)
     // Преобразовать тело в DTO
     const userDTO = new UsersDTO();
     userDTO.email = user.email;
@@ -29,6 +29,7 @@ export class AuthService {
 
     // ПроверитьDTO против функции проверки подлинности из класса-валидатора 
     await validate(userDTO).then((errors) => {
+      console.log(userDTO)
       if (errors.length ) {
         this.logger.debug(`${errors}`, AuthService.name);
       } else {

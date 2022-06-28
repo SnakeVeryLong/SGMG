@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cargo } from '../../entities/cargo.entity';
+import { CargoType } from '../../entities/cargoType.entity';
 import { Problem } from '../../entities/problems.entity';
 import { Transport } from '../../entities/tranport.entity';
 
@@ -12,19 +13,56 @@ export class ComplietCargoService {
     private readonly transportRepository: Repository<Transport>,
     @InjectRepository(Cargo)
     private readonly cargoRepository: Repository<Cargo>,
+    @InjectRepository(CargoType)
+    private readonly cargoTypeRepository: Repository<CargoType>
   ) {}
 
   async findAllTS(): Promise<Transport[]> {
-    return this.transportRepository.find({ relations: ['Cargo'] });
+    return this.transportRepository.find({ relations: ['cargo'] });
   }
 
-  async createCargo(cargo: Array<Cargo>): Promise<void> {
-    const CargoC = this.cargoRepository.create(cargo);
-
-    console.log(CargoC);
-    await this.cargoRepository.save(CargoC);
+  async findAllCargoType(): Promise<CargoType[]> {
+    return this.cargoTypeRepository.find({relations: ['cargo']});
   }
 
+  async findAllCargo(): Promise<Cargo[]> {
+    return this.cargoRepository.find({loadEagerRelations: true});
+  }
+
+  async createCargo(cargo: Array<Cargo>): Promise<Cargo[]> {
+    const getKey = (cargo: Cargo) => `${cargo.id}`;
+    try {
+      const douple = await this.cargoRepository.find({
+        where: cargo.map((item) =>{
+          return{
+            id: item.id,
+          }
+        })
+      })
+ 
+      const doupleFilter = new Set<string>(douple.map((item) => getKey(item)));
+      const filteredCargo = cargo.filter(
+        (item) => !doupleFilter.has(getKey(item)),
+      );
+      
+      if (!filteredCargo.length) return [];
+ 
+      return await this.cargoRepository.save(filteredCargo)
+    } catch (e){
+     Logger.error(
+       'Ошибка сохранения груза',
+       e,
+       'compliet-cargo.service.ts::addTransport',
+     );
+     throw new BadRequestException('Ошибка сохранения груза');
+    }
+   }
+
+  async searchTS(tsID): Promise<Transport> {
+    const ts = await this.transportRepository
+    .findOne( tsID )
+    return ts
+  }
   /**
    * Метод сохранения для ТС
    * @param transport - добавляемые ТС
@@ -66,11 +104,11 @@ export class ComplietCargoService {
     }
   }
 
-  async createTS(): Promise<void> {
+ /* async createTS(): Promise<void> {
     const tss = new Transport();
 
     const tsc = this.transportRepository.create(tss);
     console.log(tsc);
     await this.transportRepository.save(tsc);
-  }
+  }*/
 }

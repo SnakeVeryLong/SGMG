@@ -15,6 +15,7 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Post('login')
   login(@Request() req): any {
+    console.log('kjdhfkj',req)
     return this.authService.login(req.user);
   }
 

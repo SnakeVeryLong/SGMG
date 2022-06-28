@@ -8,9 +8,11 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  async login(@Req() req, @Res() res, @Body() body) {
+  async login( @Body() body) {
+    console.log("jgjh",body);
+    
     const auth = await this.authService.login(body);
-    res.status(auth.status).json(auth.msg);
+    return auth;
   }
 
   @Post('register')
