@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { AuthService } from './modules/users/auth/auth.service';
 import { JwtAuthGuard } from './modules/users/auth/strategy/jwt-auth.guard';
 
-@Controller()
+@Controller('app')
 export class AppController {
   constructor(
     private readonly appService: AppService,
